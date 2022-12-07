@@ -6,21 +6,21 @@ inputChan = extractFastq(tsvFile)
 
 process KRAKEN{
 
-	publishDir "${launchDir}/results/${idPatient}", mode: 'copy'
+	publishDir "${launchDir}/results/", mode: 'copy'
 	
-	memory 128.GB
+	memory 256.GB
 		
 	input:
-	tuple val(idPatient), val(gender), val(status), val(idSample), val(idRun), val(file1), val(file2) 
+	tuple val(idPatient), val(gender), val(status), val(idSample), val(idRun), val(file1) 
 
 	output:
 	path "*"
 
 	script:
+	db=params.database
 
 	"""
-	
-
+	kraken2 --db $db --output ${idPatient}.out --paired $file1 $file2	
 	"""
 
 }
@@ -38,20 +38,6 @@ def returnStatus(it) {
     return it
 }
 
-def returnFile(it) {
-    if (!file(it).exists()) exit 1, "Missing file in TSV file: ${it}, see --help for more information"
-    return file(it)
-}
-
-def hasExtension(it, extension) {
-    it.toString().toLowerCase().endsWith(extension.toLowerCase())
-}
-
-def checkNumberOfItem(row, number) {
-    if (row.size() != number) exit 1, "Malformed row in TSV file: ${row}, see --help for more information"
-    return true
-}
-
 def extractFastq(tsvFile) {
     Channel.from(tsvFile)
         .splitCsv(sep: '\t')
@@ -62,18 +48,7 @@ def extractFastq(tsvFile) {
             def idSample   = row[3]
             def idRun      = row[4]
             def file1      = returnFile(row[5])
-            def file2      = "null"
-            if (hasExtension(file1, "fastq.gz") || hasExtension(file1, "fq.gz") || hasExtension(file1, "fastq") || hasExtension(file1, "fq")) {
-                checkNumberOfItem(row, 7)
-                file2 = returnFile(row[6])
-                if (!hasExtension(file2, "fastq.gz") && !hasExtension(file2, "fq.gz")  && !hasExtension(file2, "fastq") && !hasExtension(file2, "fq")) exit 1, "File: ${file2} has the wrong extension. See --help for more information"
-                if (hasExtension(file1, "fastq") || hasExtension(file1, "fq") || hasExtension(file2, "fastq") || hasExtension(file2, "fq")) {
-                    exit 1, "We do recommend to use gziped fastq file to help you reduce your data footprint."
-                }
-            }
-            else if (hasExtension(file1, "bam")) checkNumberOfItem(row, 6)
-            else "No recognisable extention for input file: ${file1}"
 
-            [idPatient, gender, status, idSample, idRun, file1, file2]
+            [idPatient, gender, status, idSample, idRun, file1]
         }
 }
