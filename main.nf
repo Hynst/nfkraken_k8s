@@ -20,7 +20,7 @@ process KRAKEN{
 	db=params.database
 
 	"""
-	kraken2 --db $db --output ${idPatient}.out --paired $file1 $file2	
+	kraken2 --db $db --output ${idPatient}.out $file1	
 	"""
 
 }
