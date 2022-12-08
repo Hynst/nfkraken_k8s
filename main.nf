@@ -38,6 +38,11 @@ def returnStatus(it) {
     return it
 }
 
+def returnFile(it) {
+    if (!file(it).exists()) exit 1, "Missing file in TSV file: ${it}, see --help for more information"
+    return file(it)
+}
+
 def extractFastq(tsvFile) {
     Channel.from(tsvFile)
         .splitCsv(sep: '\t')
