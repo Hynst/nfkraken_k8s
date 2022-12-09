@@ -17,7 +17,7 @@ process KRAKEN{
 	path "*"
 
 	script:
-	db=${launchDir}/results/db/
+	db=params.database
 	
 	"""
 	kraken2 --db $db --output ${idPatient}.out $file1	
