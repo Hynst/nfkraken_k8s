@@ -4,26 +4,6 @@ inputChan = Channel.empty()
 tsvFile = file(tsvPath)
 inputChan = extractFastq(tsvFile)
 
-process BUILD_DB{
-
-	publishDir "${launchDir}/results/db/", mode: 'copy'
-
-	memory 256.GB
-
-	output:
-	path "*"
-
-	script:
-	
-	DBPATH=params.dbpath
-	
-	"""
-	kraken2-build --standard --threads 8 --db $DBPATH
-	"""
-
-}
-
-
 process KRAKEN{
 
 	publishDir "${launchDir}/results/", mode: 'copy'
@@ -31,7 +11,7 @@ process KRAKEN{
 	memory 256.GB
 		
 	input:
-	tuple val(idPatient), val(gender), val(status), val(idSample), val(idRun), val(file1) 
+	tuple val(idPatient), val(gender), val(status), val(idSample), val(idRun), val(file1)
 	
 	output:
 	path "*"
@@ -48,8 +28,7 @@ process KRAKEN{
 
 workflow {
 
-	db = BUILD_DB()
-	KRAKEN(db)
+	KRAKEN(inputChan)
 
 }
 
