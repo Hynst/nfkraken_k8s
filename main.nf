@@ -20,7 +20,7 @@ process KRAKEN{
 	db=params.database
 	
 	"""
-	kraken2 --db $db --output ${idPatient}.out $file1	
+	kraken2 --use-names --db $db --report ${idPatient}.report --output ${idPatient}.out $file1	
 	"""
 
 }
